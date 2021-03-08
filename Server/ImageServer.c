@@ -193,6 +193,10 @@ void handle_connection(int sock)
     fphc = fopen("Request.txt", "w+");
     fprintf(fphc, buffer);
     fclose(fphc);
+    fphc = fopen("Log.txt", "a");
+    fprintf(fphc, "\nRequest from Client: \n");
+    fprintf(fphc, buffer);
+    fclose(fphc);
     //Parsing the request
     parseRequest();
     //Getting content size
