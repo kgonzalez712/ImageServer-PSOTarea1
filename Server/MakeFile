@@ -1,0 +1,6 @@
+# MakeFile for compiling the ImageServer
+ImageServer: ImageServer.c
+	gcc -o ImageServer ImageServer.c
+
+
+
