@@ -12,7 +12,7 @@
 /*
     Defined Variables used
 */
-#define MAXLINE 4096
+#define MAXLINE 100000
 char bufP[100];
 char bufC[100];
 char bufH[100];
