@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <time.h>
 
 /*
     Defined Variables used
@@ -31,8 +32,9 @@ void CallPy(int num)
         system("python3 sqrt.py");
     }
     else
-        (
-            system("python3 sqrt.py");)
+    {
+        system("python3 sqrt.py");
+    }
 }
 int stringSearch(char s1[], char s2[])
 {
@@ -190,6 +192,40 @@ void getContent(int line_no)
 
 int handle_connection(int sock)
 {
+    time_t rawtime;
+    struct tm *timeinfo;
+
+    int n;
+    char buffer[MAXLINE];
+    char *hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!\n";
+
+    bzero(buffer, MAXLINE);
+    n = read(sock, buffer, MAXLINE - 1);
+    if (n < 0)
+        error("ERROR reading from socket");
+    //Read the client request
+    printf("%s\n", buffer);
+    FILE *fphc, *fpcl, *fpc;
+    fphc = fopen("Request.txt", "w+");
+    fprintf(fphc, buffer);
+    fclose(fphc);
+    fphc = fopen("Log.txt", "a");
+    fprintf(fphc, "\nRequest from Client: \n");
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+    fprintf(fphc, "Current local time and date: %s", asctime(timeinfo));
+    fprintf(fphc, buffer);
+    fclose(fphc);
+    //Parsing the request
+    parseRequest();
+    //Getting content size
+    fpcl = fopen("CLength.txt", "r");
+    fscanf(fpcl, "%*s %s", bufP);
+    Cont_len = atoi(bufP);
+    fclose(fpcl);
+    //Getting content
+    printf("Getting Content... \n");
+    getContent(Cont_line);
     int pid2 = fork();
     if (pid2 == -1)
     {
@@ -206,36 +242,9 @@ int handle_connection(int sock)
     else
     {
         wait(NULL);
-        int n;
-        char buffer[MAXLINE];
-        char *hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!\n";
 
-        bzero(buffer, MAXLINE);
-        n = read(sock, buffer, MAXLINE - 1);
-        if (n < 0)
-            error("ERROR reading from socket");
-        //Read the client request
-        printf("%s\n", buffer);
-        FILE *fphc, *fpcl, *fpc;
-        fphc = fopen("Request.txt", "w+");
-        fprintf(fphc, buffer);
-        fclose(fphc);
-        fphc = fopen("Log.txt", "a");
-        fprintf(fphc, "\nRequest from Client: \n");
-        fprintf(fphc, buffer);
-        fclose(fphc);
-        //Parsing the request
-        parseRequest();
-        //Getting content size
-        fpcl = fopen("CLength.txt", "r");
-        fscanf(fpcl, "%*s %s", bufP);
-        Cont_len = atoi(bufP);
-        fclose(fpcl);
-        //Getting content
-        printf("Getting Content... \n");
-        getContent(Cont_line);
         //Reading the Image
-        CallPy();
+        //CallPy(num);
         printf("Done!... Starting image Procesing... \n");
         n = write(sock, hello, strlen(hello));
         if (n < 0)
