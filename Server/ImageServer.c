@@ -27,13 +27,13 @@ char *PATHL;
 
 void CallPy(int num)
 {
-    if (num == 1)
+    if (num == 0)
     {
-        system("python3 sqrt.py");
+        system("python3 Histo.py");
     }
     else
     {
-        system("python3 sqrt.py");
+        system("python3 Color.py");
     }
 }
 int stringSearch(char s1[], char s2[])
