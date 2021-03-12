@@ -24,6 +24,16 @@ char *PATHC;
 char *PATHH;
 char *PATHL;
 
+void CallPy(int num)
+{
+    if (num == 1)
+    {
+        system("python3 sqrt.py");
+    }
+    else
+        (
+            system("python3 sqrt.py");)
+}
 int stringSearch(char s1[], char s2[])
 {
     //char s1[] = "Content-Lenght: 117890";
@@ -178,40 +188,61 @@ void getContent(int line_no)
     fclose(rfl2);
 }
 
-void handle_connection(int sock)
+int handle_connection(int sock)
 {
-    int n;
-    char buffer[MAXLINE];
+    int pid2 = fork();
+    if (pid2 == -1)
+    {
+        return 1;
+    }
+    if (pid2 == 0)
+    {
+        int num;                                                                     //this makes a vairable for you to store the value in
+        printf("enter 0 for Histogram or any other number for Color Selection: \n"); //this prints a prompt for the user
+        scanf("%d", &num);                                                           //this takes in the argument given and stores it
+        //into the address of age
+        CallPy(num);
+    }
+    else
+    {
+        wait(NULL);
+        int n;
+        char buffer[MAXLINE];
+        char *hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!\n";
 
-    bzero(buffer, MAXLINE);
-    n = read(sock, buffer, MAXLINE - 1);
-    if (n < 0)
-        error("ERROR reading from socket");
-    //Read the client request
-    printf("%s\n", buffer);
-    FILE *fphc, *fpcl, *fpc;
-    fphc = fopen("Request.txt", "w+");
-    fprintf(fphc, buffer);
-    fclose(fphc);
-    fphc = fopen("Log.txt", "a");
-    fprintf(fphc, "\nRequest from Client: \n");
-    fprintf(fphc, buffer);
-    fclose(fphc);
-    //Parsing the request
-    parseRequest();
-    //Getting content size
-    fpcl = fopen("CLength.txt", "r");
-    fscanf(fpcl, "%*s %s", bufP);
-    Cont_len = atoi(bufP);
-    fclose(fpcl);
-    //Getting content
-    getContent(Cont_line);
-    //Reading the Image
-    printf("Done!... Starting image Procesing... \n");
-    return (0);
-    n = write(sock, "I got your message", 18);
-    if (n < 0)
-        error("ERROR writing to socket");
+        bzero(buffer, MAXLINE);
+        n = read(sock, buffer, MAXLINE - 1);
+        if (n < 0)
+            error("ERROR reading from socket");
+        //Read the client request
+        printf("%s\n", buffer);
+        FILE *fphc, *fpcl, *fpc;
+        fphc = fopen("Request.txt", "w+");
+        fprintf(fphc, buffer);
+        fclose(fphc);
+        fphc = fopen("Log.txt", "a");
+        fprintf(fphc, "\nRequest from Client: \n");
+        fprintf(fphc, buffer);
+        fclose(fphc);
+        //Parsing the request
+        parseRequest();
+        //Getting content size
+        fpcl = fopen("CLength.txt", "r");
+        fscanf(fpcl, "%*s %s", bufP);
+        Cont_len = atoi(bufP);
+        fclose(fpcl);
+        //Getting content
+        printf("Getting Content... \n");
+        getContent(Cont_line);
+        //Reading the Image
+        CallPy();
+        printf("Done!... Starting image Procesing... \n");
+        n = write(sock, hello, strlen(hello));
+        if (n < 0)
+            perror("ERROR writing to socket");
+        printf("------------------Hello message sent------------------- \n");
+        return 0;
+    }
 }
 
 int main()
@@ -288,7 +319,11 @@ int main()
             exit(0);
         }
         else
+        {
+            wait(NULL);
             close(newsockfd);
+        }
+
     } /* end of while */
     close(sockfd);
 
